@@ -1,38 +1,47 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Modal, Platform, Button } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
 import { ThemedText } from '../../components/ThemedText';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import VideoOverlay from '../../components/VideoOverlay';
 import { videos } from './profiles'; // Import the videos array from profiles
-import MessagePopup from '../../components/MessagePopup';
 
-// Add this type definition at the top of your file, after the imports
-type Connection = { id: number; name: string; };
+// Import the Connection type from your global state
+import { Connection as GlobalConnection } from '@/context/GlobalStateContext';
+
+// Update the local Connection type to extend the global one
+type Connection = GlobalConnection & { preferredTime: string };
 
 export default function ConnectionsTab() {
   const { connections } = useGlobalState();
 
+  // Cast the connections to the local Connection type
+  const typedConnections: Connection[] = connections as Connection[];
+
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [showVideoOverlay, setShowVideoOverlay] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
-  const [showMessagePopup, setShowMessagePopup] = useState(false);
-  const [selectedConnectionForMessage, setSelectedConnectionForMessage] = useState<Connection | null>(null);
+  const [showScheduleOverlay, setShowScheduleOverlay] = useState(false);
+  const [date, setDate] = useState(new Date());
 
   const handleSchedule = (connection: Connection) => {
     setSelectedConnection(connection);
-    setShowDatePicker(true);
+    setShowScheduleOverlay(true);
   };
 
   const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
     setShowDatePicker(false);
-    if (selectedDate && selectedConnection) {
-      console.log(`Scheduled for ${selectedConnection.name}: ${selectedDate}`);
-      // Here you can implement the logic to save the scheduled date
-    }
+    setDate(currentDate);
+  };
+
+  const handleTimeChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    setShowTimePicker(false);
+    setDate(currentDate);
   };
 
   const handleReplay = (connection: Connection) => {
@@ -41,11 +50,6 @@ export default function ConnectionsTab() {
       setSelectedVideo(video.source);
       setShowVideoOverlay(true);
     }
-  };
-
-  const handleMessage = (connection: Connection) => {
-    setSelectedConnectionForMessage(connection);
-    setShowMessagePopup(true);
   };
 
   const renderConnectionItem = ({ item }: { item: Connection }) => (
@@ -64,12 +68,6 @@ export default function ConnectionsTab() {
         >
           <Ionicons name="calendar-outline" size={24} color="blue" />
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.iconButton}
-          onPress={() => handleMessage(item)}
-        >
-          <Ionicons name="chatbubble-outline" size={24} color="blue" />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -80,22 +78,14 @@ export default function ConnectionsTab() {
         <Text style={styles.title}>Your Connections</Text>
       </View>
       <View style={styles.container}>
-        {connections.length > 0 ? (
+        {typedConnections.length > 0 ? (
           <FlatList
-            data={connections}
+            data={typedConnections}
             renderItem={renderConnectionItem}
             keyExtractor={(item) => item.id.toString()}
           />
         ) : (
           <Text style={styles.emptyText}>No connections yet. Double tap videos to add them here!</Text>
-        )}
-        {showDatePicker && (
-          <DateTimePicker
-            value={new Date()}
-            mode="date"
-            display="default"
-            onChange={handleDateChange}
-          />
         )}
       </View>
       {showVideoOverlay && selectedVideo && (
@@ -104,10 +94,54 @@ export default function ConnectionsTab() {
           onClose={() => setShowVideoOverlay(false)}
         />
       )}
-      {showMessagePopup && selectedConnectionForMessage && (
-        <MessagePopup
-          connection={selectedConnectionForMessage}
-          onClose={() => setShowMessagePopup(false)}
+      <Modal
+        transparent={true}
+        visible={showScheduleOverlay}
+        onRequestClose={() => setShowScheduleOverlay(false)}
+      >
+        <View style={styles.overlayContainer}>
+          <View style={styles.overlayContent}>
+            <Text style={styles.overlayTitle}>Schedule with {selectedConnection?.name}</Text>
+            <Text style={styles.preferredTimeText}>
+              Preferred Time: {selectedConnection?.preferredTime}
+            </Text>
+            {Platform.OS === 'ios' ? (
+              <DateTimePicker
+                value={date}
+                mode="datetime"
+                display="default"
+                onChange={handleDateChange}
+              />
+            ) : (
+              <>
+                <Button title="Select Date" onPress={() => setShowDatePicker(true)} />
+                <Button title="Select Time" onPress={() => setShowTimePicker(true)} />
+              </>
+            )}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowScheduleOverlay(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {Platform.OS === 'android' && showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
+      )}
+      {Platform.OS === 'android' && showTimePicker && (
+        <DateTimePicker
+          value={date}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={handleTimeChange}
         />
       )}
     </SafeAreaView>
@@ -164,5 +198,41 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 10,
+  },
+  overlayContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  overlayContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  overlayTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  preferredTimeText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: 'gray',
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  modalView: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
   },
 });

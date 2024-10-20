@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type Connection = { id: number; name: string; source: any };
+// Export the Connection type
+export type Connection = {
+  id: number;
+  name: string;
+  source: any;
+};
 
 type GlobalStateContextType = {
   likedVideos: string[];
