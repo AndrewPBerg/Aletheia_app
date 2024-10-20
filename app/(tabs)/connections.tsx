@@ -1,23 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Modal, Platform, Button } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
 import { ThemedText } from '../../components/ThemedText';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import VideoOverlay from '../../components/VideoOverlay';
+import VideoCall from '../../components/VideoCall';
+import MessagePopup from '../../components/MessagePopup'; // Import MessagePopup
 import { videos } from './profiles'; // Import the videos array from profiles
 
 // Import the Connection type from your global state
 import { Connection as GlobalConnection } from '@/context/GlobalStateContext';
 
-// Update the local Connection type to extend the global one
-type Connection = GlobalConnection & { preferredTime: string };
+// Update the local Connection type
+type Connection = GlobalConnection & {
+  preferredTime: string;
+  videoCallCompleted: boolean; // New property
+};
 
 export default function ConnectionsTab() {
-  const { connections } = useGlobalState();
+  const { connections: globalConnections } = useGlobalState();
 
-  // Cast the connections to the local Connection type
-  const typedConnections: Connection[] = connections as Connection[];
+  const [connections, setConnections] = useState<Connection[]>([]);
+
+  useEffect(() => {
+    // Initialize connections with videoCallCompleted property
+    setConnections(
+      (globalConnections as Connection[]).map(conn => ({
+        ...conn,
+        videoCallCompleted: false,
+        preferredTime: conn.preferredTime || '' // Ensure preferredTime exists
+      }))
+    );
+  }, [globalConnections]);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -26,6 +41,10 @@ export default function ConnectionsTab() {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [showScheduleOverlay, setShowScheduleOverlay] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [currentVideoCallConnection, setCurrentVideoCallConnection] = useState<Connection | null>(null);
+  const [showMessagePopup, setShowMessagePopup] = useState(false);
+  const [selectedMessageConnection, setSelectedMessageConnection] = useState<Connection | null>(null);
 
   const handleSchedule = (connection: Connection) => {
     setSelectedConnection(connection);
@@ -52,10 +71,54 @@ export default function ConnectionsTab() {
     }
   };
 
+  const handleVideoCall = (connection: Connection) => {
+    setCurrentVideoCallConnection(connection);
+    setShowVideoCall(true);
+  };
+
+  const handleVideoCallEnd = () => {
+    if (currentVideoCallConnection) {
+      setConnections(prevConnections =>
+        prevConnections.map(conn =>
+          conn.id === currentVideoCallConnection.id
+            ? { ...conn, videoCallCompleted: true }
+            : conn
+        )
+      );
+    }
+    setShowVideoCall(false);
+    setCurrentVideoCallConnection(null);
+  };
+
+  const handleMessage = (connection: Connection) => {
+    setSelectedMessageConnection(connection);
+    setShowMessagePopup(true);
+  };
+
+  const handleCloseMessagePopup = () => {
+    setShowMessagePopup(false);
+    setSelectedMessageConnection(null);
+  };
+
   const renderConnectionItem = ({ item }: { item: Connection }) => (
     <View style={styles.connectionRow}>
       <ThemedText>{item.name}</ThemedText>
       <View style={styles.buttonContainer}>
+        {item.videoCallCompleted ? (
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => handleMessage(item)}
+          >
+            <Ionicons name="chatbubble-outline" size={24} color="blue" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => handleVideoCall(item)}
+          >
+            <Ionicons name="videocam-outline" size={24} color="blue" />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity 
           style={styles.iconButton}
           onPress={() => handleReplay(item)}
@@ -72,15 +135,18 @@ export default function ConnectionsTab() {
     </View>
   );
 
+  const userVideoSource = require('../../assets/video_profiles/demoVideo1.mp4');
+  const connectionVideoSource = require('../../assets/video_profiles/demoVideo2.mp4');
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Your Connections</Text>
       </View>
       <View style={styles.container}>
-        {typedConnections.length > 0 ? (
+        {connections.length > 0 ? (
           <FlatList
-            data={typedConnections}
+            data={connections}
             renderItem={renderConnectionItem}
             keyExtractor={(item) => item.id.toString()}
           />
@@ -144,6 +210,26 @@ export default function ConnectionsTab() {
           onChange={handleTimeChange}
         />
       )}
+      {showVideoCall && currentVideoCallConnection && (
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={showVideoCall}
+          onRequestClose={handleVideoCallEnd}
+        >
+          <VideoCall
+            userVideo={userVideoSource}
+            connectionVideo={connectionVideoSource}
+            onClose={handleVideoCallEnd}
+          />
+        </Modal>
+      )}
+      {showMessagePopup && selectedMessageConnection && (
+        <MessagePopup
+          connection={selectedMessageConnection}
+          onClose={handleCloseMessagePopup}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -194,7 +280,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    width: '50%', // Adjust this value to ensure proper spacing
+    width: '60%', // Increased width to accommodate the new button
   },
   iconButton: {
     padding: 10,
