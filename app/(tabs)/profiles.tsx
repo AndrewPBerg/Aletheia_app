@@ -132,11 +132,11 @@ export default function ProfilesTab() {
           )}
         </View>
       </TouchableWithoutFeedback>
-      <View style={styles.iconContainer}>
+      {/* <View style={styles.iconContainer}>
         <View style={styles.iconBox} />
         <View style={styles.iconBox} />
         <View style={styles.iconBox} />
-      </View>
+      </View> */}
     </View>
   );
 
@@ -192,12 +192,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  iconContainer: {
-    position: 'absolute',
-    right: 20,
-    top: '50%',
-    transform: [{ translateY: -((iconSize + iconMargin) * 1.5) }],
-  },
+  // iconContainer: {
+  //   position: 'absolute',
+  //   right: 20,
+  //   top: '50%',
+  //   transform: [{ translateY: -((iconSize + iconMargin) * 1.5) }],
+  // },
   iconBox: {
     width: iconSize,
     height: iconSize,
