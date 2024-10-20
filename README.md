@@ -1,3 +1,9 @@
+# Tutorial
+
+- cd into Aletheia dir
+- using node 20.1.0
+- expo 6.3.12
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
