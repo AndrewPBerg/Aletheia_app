@@ -9,9 +9,9 @@ const iconSize = 50; // Size of each icon box
 const iconMargin = 10; // Margin between icon boxes
 
 export const videos = [
-  { id: 1, name: 'Demo Video 1', source: require('../../assets/video_profiles/demoVideo1.mp4') },
-  { id: 2, name: 'Demo Video 2', source: require('../../assets/video_profiles/demoVideo2.mp4') },
-  { id: 3, name: 'Demo Video 3', source: require('../../assets/video_profiles/demoVideo3.mp4') },
+  { id: 1, name: 'John K.', source: require('../../assets/video_profiles/demoVideo1.mp4') },
+  { id: 2, name: 'Jim D.', source: require('../../assets/video_profiles/demoVideo2.mp4') },
+  { id: 3, name: 'Bobby J.', source: require('../../assets/video_profiles/demoVideo3.mp4') },
 ];
 
 interface VideoStatus {
