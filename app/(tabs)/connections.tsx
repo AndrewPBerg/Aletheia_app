@@ -1,6 +1,13 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, Button } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
+import { Link } from 'expo-router';
+import { ThemedText } from '../../components/ThemedText';
+// Import DateTimePicker
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+// Add this type definition at the top of your file, after the imports
+type Connection = { id: number; name: string };
 
 export default function ConnectionsTab() {
   const { likedVideos } = useGlobalState();
@@ -10,6 +17,28 @@ export default function ConnectionsTab() {
       <Text style={styles.videoName}>{item}</Text>
     </View>
   );
+
+  const [connections, setConnections] = React.useState([
+    { id: 1, name: 'John Doe' },
+    { id: 2, name: 'Jane Smith' },
+    // ... other connections
+  ]);
+
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+  const [selectedConnection, setSelectedConnection] = React.useState<Connection | null>(null);
+
+  const handleSchedule = (connection: Connection) => {
+    setSelectedConnection(connection);
+    setShowDatePicker(true);
+  };
+
+  const handleDateChange = (event: Event, selectedDate: Date | undefined) => {
+    setShowDatePicker(false);
+    if (selectedDate && selectedConnection) {
+      console.log(`Scheduled for ${selectedConnection.name}: ${selectedDate}`);
+      // Here you can implement the logic to save the scheduled date
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -25,6 +54,34 @@ export default function ConnectionsTab() {
           />
         ) : (
           <Text style={styles.emptyText}>No connections yet. Double tap videos to add them here!</Text>
+        )}
+        {connections.map((connection) => (
+          <View key={connection.id} style={styles.connectionRow}>
+            <ThemedText>{connection.name}</ThemedText>
+            <View style={styles.buttonContainer}>
+              <Link href="/profiles" asChild>
+                <Button title="View Profile" />
+              </Link>
+              <Button 
+                title="Schedule" 
+                onPress={() => handleSchedule(connection)}
+              />
+            </View>
+          </View>
+        ))}
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate && selectedConnection) {
+                console.log(`Scheduled for ${selectedConnection.name}: ${selectedDate}`);
+                // Here you can implement the logic to save the scheduled date
+              }
+            }}
+          />
         )}
       </View>
     </SafeAreaView>
@@ -66,5 +123,15 @@ const styles = StyleSheet.create({
     marginTop: 50,
     fontSize: 16,
     color: '#666',
+  },
+  connectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
   },
 });
