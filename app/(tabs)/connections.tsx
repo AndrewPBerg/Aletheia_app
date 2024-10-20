@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Modal } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
 import { ThemedText } from '../../components/ThemedText';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -7,6 +7,7 @@ import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import VideoOverlay from '../../components/VideoOverlay';
 import { videos } from './profiles'; // Import the videos array from profiles
+import MessagePopup from '../../components/MessagePopup';
 
 // Add this type definition at the top of your file, after the imports
 type Connection = { id: number; name: string; };
@@ -18,6 +19,8 @@ export default function ConnectionsTab() {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [showVideoOverlay, setShowVideoOverlay] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [showMessagePopup, setShowMessagePopup] = useState(false);
+  const [selectedConnectionForMessage, setSelectedConnectionForMessage] = useState<Connection | null>(null);
 
   const handleSchedule = (connection: Connection) => {
     setSelectedConnection(connection);
@@ -40,6 +43,11 @@ export default function ConnectionsTab() {
     }
   };
 
+  const handleMessage = (connection: Connection) => {
+    setSelectedConnectionForMessage(connection);
+    setShowMessagePopup(true);
+  };
+
   const renderConnectionItem = ({ item }: { item: Connection }) => (
     <View style={styles.connectionRow}>
       <ThemedText>{item.name}</ThemedText>
@@ -55,6 +63,12 @@ export default function ConnectionsTab() {
           onPress={() => handleSchedule(item)}
         >
           <Ionicons name="calendar-outline" size={24} color="blue" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.iconButton}
+          onPress={() => handleMessage(item)}
+        >
+          <Ionicons name="chatbubble-outline" size={24} color="blue" />
         </TouchableOpacity>
       </View>
     </View>
@@ -88,6 +102,12 @@ export default function ConnectionsTab() {
         <VideoOverlay
           videoSource={selectedVideo}
           onClose={() => setShowVideoOverlay(false)}
+        />
+      )}
+      {showMessagePopup && selectedConnectionForMessage && (
+        <MessagePopup
+          connection={selectedConnectionForMessage}
+          onClose={() => setShowMessagePopup(false)}
         />
       )}
     </SafeAreaView>
@@ -139,6 +159,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
+    width: '50%', // Adjust this value to ensure proper spacing
   },
   iconButton: {
     padding: 10,
