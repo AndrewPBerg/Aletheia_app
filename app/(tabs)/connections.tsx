@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
 import { Link } from 'expo-router';
 import { ThemedText } from '../../components/ThemedText';
 // Import DateTimePicker
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { videos } from './profiles'; // Import the videos array
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+// Import the icons we need
+import { Ionicons } from '@expo/vector-icons';
 
 // Add this type definition at the top of your file, after the imports
 type Connection = { id: number; name: string; source: any };
@@ -35,12 +36,16 @@ export default function ConnectionsTab() {
       <ThemedText>{item.name}</ThemedText>
       <View style={styles.buttonContainer}>
         <Link href={{ pathname: "/profiles", params: { id: item.id } }} asChild>
-          <Button title="View Profile" />
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="play-circle-outline" size={24} color="blue" />
+          </TouchableOpacity>
         </Link>
-        <Button 
-          title="Schedule" 
+        <TouchableOpacity 
+          style={styles.iconButton}
           onPress={() => handleSchedule(item)}
-        />
+        >
+          <Ionicons name="calendar-outline" size={24} color="blue" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -118,5 +123,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+  },
+  iconButton: {
+    padding: 10,
   },
 });
