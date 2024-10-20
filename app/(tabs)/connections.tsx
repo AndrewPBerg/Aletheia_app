@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
-import { Link } from 'expo-router';
 import { ThemedText } from '../../components/ThemedText';
-// Import DateTimePicker
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-// Import the icons we need
 import { Ionicons } from '@expo/vector-icons';
+import VideoOverlay from '../../components/VideoOverlay';
+import { videos } from './profiles'; // Import the videos array from profiles
 
 // Add this type definition at the top of your file, after the imports
-type Connection = { id: number; name: string; source: any };
+type Connection = { id: number; name: string; };
 
 export default function ConnectionsTab() {
   const { connections } = useGlobalState();
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
+  const [showVideoOverlay, setShowVideoOverlay] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
 
   const handleSchedule = (connection: Connection) => {
     setSelectedConnection(connection);
@@ -31,15 +32,24 @@ export default function ConnectionsTab() {
     }
   };
 
+  const handleReplay = (connection: Connection) => {
+    const video = videos.find(v => v.id === connection.id);
+    if (video) {
+      setSelectedVideo(video.source);
+      setShowVideoOverlay(true);
+    }
+  };
+
   const renderConnectionItem = ({ item }: { item: Connection }) => (
     <View style={styles.connectionRow}>
       <ThemedText>{item.name}</ThemedText>
       <View style={styles.buttonContainer}>
-        <Link href={{ pathname: "/profiles", params: { id: item.id } }} asChild>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="play-circle-outline" size={24} color="blue" />
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity 
+          style={styles.iconButton}
+          onPress={() => handleReplay(item)}
+        >
+          <Ionicons name="play-circle-outline" size={24} color="blue" />
+        </TouchableOpacity>
         <TouchableOpacity 
           style={styles.iconButton}
           onPress={() => handleSchedule(item)}
@@ -74,6 +84,12 @@ export default function ConnectionsTab() {
           />
         )}
       </View>
+      {showVideoOverlay && selectedVideo && (
+        <VideoOverlay
+          videoSource={selectedVideo}
+          onClose={() => setShowVideoOverlay(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }
