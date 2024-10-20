@@ -135,8 +135,8 @@ export default function ConnectionsTab() {
     </View>
   );
 
-  const userVideoSource = require('../../assets/video_profiles/demoVideo1.mp4');
-  const connectionVideoSource = require('../../assets/video_profiles/demoVideo2.mp4');
+  const userVideoSource = require('../../assets/video_profiles/benket_chat.mp4');
+  const connectionVideoSource = require('../../assets/video_profiles/anya_chat.mp4');
 
   return (
     <SafeAreaView style={styles.safeArea}>

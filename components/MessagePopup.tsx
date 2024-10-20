@@ -17,9 +17,7 @@ interface Message {
 
 const MessagePopup: React.FC<MessagePopupProps> = ({ connection, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', text: "Hey there! How are you?", sender: 'connection' },
-    { id: '2', text: "Hi! I'm doing great, thanks for asking. How about you?", sender: 'user' },
-    { id: '3', text: "I'm good too! Did you watch any interesting videos lately?", sender: 'connection' },
+
   ]);
   const [inputText, setInputText] = useState('');
 

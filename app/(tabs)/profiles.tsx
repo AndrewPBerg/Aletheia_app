@@ -21,24 +21,17 @@ interface Video {
 export const videos: Video[] = [
   { 
     id: 1, 
-    name: 'John K.', 
-    age: 28, // Add age
-    source: require('../../assets/video_profiles/demoVideo1.mp4'),
-    preferredTime: '10:00 AM'
+    name: 'Edna M.', 
+    age: 35, // Add age
+    source: require('../../assets/video_profiles/edna_profile.mp4'),
+    preferredTime: '12:00 AM'
   },
   { 
     id: 2, 
-    name: 'Jim D.', 
-    age: 35, // Add age
-    source: require('../../assets/video_profiles/demoVideo2.mp4'),
+    name: 'Anya B.', 
+    age: 30, // Add age
+    source: require('../../assets/video_profiles/anya_profile.mp4'),
     preferredTime: '2:00 PM'
-  },
-  { 
-    id: 3, 
-    name: 'Bobby J.', 
-    age: 31, // Add age
-    source: require('../../assets/video_profiles/demoVideo3.mp4'),
-    preferredTime: '4:30 PM'
   },
 ];
 
