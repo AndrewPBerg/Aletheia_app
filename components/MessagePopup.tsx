@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 type Connection = { id: number; name: string; };
@@ -9,7 +9,33 @@ interface MessagePopupProps {
   onClose: () => void;
 }
 
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'connection';
+}
+
 const MessagePopup: React.FC<MessagePopupProps> = ({ connection, onClose }) => {
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '1', text: "Hey there! How are you?", sender: 'connection' },
+    { id: '2', text: "Hi! I'm doing great, thanks for asking. How about you?", sender: 'user' },
+    { id: '3', text: "I'm good too! Did you watch any interesting videos lately?", sender: 'connection' },
+  ]);
+  const [inputText, setInputText] = useState('');
+
+  const sendMessage = () => {
+    if (inputText.trim()) {
+      setMessages([...messages, { id: Date.now().toString(), text: inputText.trim(), sender: 'user' }]);
+      setInputText('');
+    }
+  };
+
+  const renderMessage = ({ item }: { item: Message }) => (
+    <View style={[styles.messageBubble, item.sender === 'user' ? styles.userMessage : styles.connectionMessage]}>
+      <Text style={styles.messageText}>{item.text}</Text>
+    </View>
+  );
+
   return (
     <Modal
       animationType="slide"
@@ -25,16 +51,22 @@ const MessagePopup: React.FC<MessagePopupProps> = ({ connection, onClose }) => {
               <Ionicons name="close" size={24} color="black" />
             </TouchableOpacity>
           </View>
-          <View style={styles.messageContainer}>
-            <Text style={styles.messageText}>Hello! How are you doing today?</Text>
-          </View>
+          <FlatList
+            data={messages}
+            renderItem={renderMessage}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.messageList}
+            inverted
+          />
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               placeholder="Type a message..."
+              value={inputText}
+              onChangeText={setInputText}
               multiline
             />
-            <TouchableOpacity style={styles.sendButton}>
+            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
               <Ionicons name="send" size={24} color="blue" />
             </TouchableOpacity>
           </View>
@@ -56,7 +88,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     width: '90%',
-    maxHeight: '80%',
+    height: '80%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -76,11 +108,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  messageContainer: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
+  messageList: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+  },
+  messageBubble: {
+    maxWidth: '80%',
     padding: 10,
-    marginBottom: 20,
+    borderRadius: 15,
+    marginVertical: 5,
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#DCF8C6',
+  },
+  connectionMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E5E5EA',
   },
   messageText: {
     fontSize: 16,
@@ -88,6 +132,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 10,
   },
   input: {
     flex: 1,
@@ -96,6 +141,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     marginRight: 10,
+    maxHeight: 100,
   },
   sendButton: {
     padding: 10,
