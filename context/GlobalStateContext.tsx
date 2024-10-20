@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface GlobalStateContextType {
   likedVideos: string[];
-  addLikedVideo: (videoUri: string) => void;
+  addLikedVideo: (videoName: string) => void;
 }
 
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
@@ -10,10 +10,10 @@ const GlobalStateContext = createContext<GlobalStateContextType | undefined>(und
 export const GlobalStateProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [likedVideos, setLikedVideos] = useState<string[]>([]);
 
-  const addLikedVideo = (videoUri: string) => {
+  const addLikedVideo = (videoName: string) => {
     setLikedVideos((prev) => {
-      if (!prev.includes(videoUri)) {
-        return [...prev, videoUri];
+      if (!prev.includes(videoName)) {
+        return [...prev, videoName];
       }
       return prev;
     });

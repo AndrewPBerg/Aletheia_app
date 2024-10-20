@@ -1,55 +1,65 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
-
-const { width } = Dimensions.get('window');
 
 export default function ConnectionsTab() {
   const { likedVideos } = useGlobalState();
 
   const renderVideoItem = ({ item }: { item: string }) => (
     <View style={styles.videoContainer}>
-      <Video
-        source={{ uri: item }}
-        style={styles.video}
-        resizeMode={ResizeMode.COVER}
-        useNativeControls
-        isLooping
-      />
+      <Text style={styles.videoName}>{item}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      {likedVideos.length > 0 ? (
-        <FlatList
-          data={likedVideos}
-          renderItem={renderVideoItem}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={2}
-        />
-      ) : (
-        <Text style={styles.emptyText}>No connections yet. Double tap videos to add them here!</Text>
-      )}
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Your Connections</Text>
+      </View>
+      <View style={styles.container}>
+        {likedVideos.length > 0 ? (
+          <FlatList
+            data={likedVideos}
+            renderItem={renderVideoItem}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        ) : (
+          <Text style={styles.emptyText}>No connections yet. Double tap videos to add them here!</Text>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  titleContainer: {
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingTop: 40, // Added top padding to lower the title
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 20,
   },
   videoContainer: {
-    width: width / 2 - 15,
-    height: 200,
-    margin: 5,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  video: {
-    width: '100%',
-    height: '100%',
+  videoName: {
+    fontSize: 16,
   },
   emptyText: {
     textAlign: 'center',

@@ -8,9 +8,9 @@ const iconSize = 50; // Size of each icon box
 const iconMargin = 10; // Margin between icon boxes
 
 const videos = [
-  require('../../assets/video_profiles/demoVideo1.mp4'),
-  require('../../assets/video_profiles/demoVideo2.mp4'),
-  require('../../assets/video_profiles/demoVideo3.mp4'),
+  { name: 'Demo Video 1', source: require('../../assets/video_profiles/demoVideo1.mp4') },
+  { name: 'Demo Video 2', source: require('../../assets/video_profiles/demoVideo2.mp4') },
+  { name: 'Demo Video 3', source: require('../../assets/video_profiles/demoVideo3.mp4') },
 ];
 
 export default function ProfilesTab() {
@@ -87,17 +87,17 @@ export default function ProfilesTab() {
       useNativeDriver: true,
     }).start();
 
-    // Add the liked video to the global state
-    addLikedVideo(videos[index]);
+    // Add the liked video name to the global state
+    addLikedVideo(videos[index].name);
   };
 
-  const renderVideoItem = ({ item, index }: { item: any; index: number }) => (
+  const renderVideoItem = ({ item, index }: { item: { name: string; source: any }; index: number }) => (
     <View style={styles.videoContainer}>
       <TouchableWithoutFeedback onPress={() => handleDoubleTap(index)}>
         <View style={styles.videoWrapper}>
           <Video
             ref={(ref) => { videoRefs.current[index] = ref; }}
-            source={item}
+            source={item.source}
             rate={1.0}
             volume={1.0}
             isMuted={false}
