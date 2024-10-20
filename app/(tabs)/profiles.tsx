@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, FlatList, TouchableWithoutFeedback, Animated, Text, Platform } from 'react-native';
+import { View, StyleSheet, Dimensions, FlatList, TouchableWithoutFeedback, Animated, Text, Platform, Image } from 'react-native';
 import { Video as ExpoVideo, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { useGlobalState } from '@/context/GlobalStateContext';
 import { LinearGradient } from 'expo-linear-gradient';
+import aletheiaLogo from '../../assets/images/aletheia_logo.png';
 
 const { width, height } = Dimensions.get('window');
 const iconSize = 50; // Size of each icon box
@@ -176,7 +177,7 @@ export default function ProfilesTab() {
                 opacity: fadeAnim,
               }
             ]}>
-              <View style={styles.likeIcon} />
+              <Image source={aletheiaLogo} style={styles.likeIcon} />
             </Animated.View>
           )}
         </View>
@@ -296,10 +297,9 @@ const styles = StyleSheet.create({
     top: '50%',
   },
   likeIcon: {
-    width: 80,
-    height: 80,
-    backgroundColor: 'red', // You can change this color
-    borderRadius: 40, // This makes it circular
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
   },
   overlay: {
     position: 'absolute',
