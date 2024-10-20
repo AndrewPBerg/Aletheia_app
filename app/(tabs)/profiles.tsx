@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, Dimensions, FlatList, TouchableWithoutFeedback, Animated } from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { useGlobalState } from '@/context/GlobalStateContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 const iconSize = 50; // Size of each icon box
@@ -13,9 +14,16 @@ export const videos = [
   { id: 3, name: 'Demo Video 3', source: require('../../assets/video_profiles/demoVideo3.mp4') },
 ];
 
+interface VideoStatus {
+  isPlaying: boolean;
+  positionMillis: number;
+  durationMillis: number;
+  progress: number;
+}
+
 export default function ProfilesTab() {
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
-  const [videoStatus, setVideoStatus] = useState<{ [key: number]: boolean }>({});
+  const [videoStatus, setVideoStatus] = useState<{ [key: number]: VideoStatus }>({});
   const [likedVideos, setLikedVideos] = useState<{ [key: number]: boolean }>({});
   const flatListRef = useRef(null);
   const videoRefs = useRef<{ [key: number]: Video | null }>({});
@@ -34,12 +42,18 @@ export default function ProfilesTab() {
 
   const togglePlayPause = (index: number) => {
     if (videoRefs.current[index]) {
-      if (videoStatus[index]) {
+      if (videoStatus[index]?.isPlaying) {
         videoRefs.current[index]?.pauseAsync();
       } else {
         videoRefs.current[index]?.playAsync();
       }
-      setVideoStatus(prev => ({ ...prev, [index]: !prev[index] }));
+      setVideoStatus(prev => ({
+        ...prev,
+        [index]: {
+          ...prev[index],
+          isPlaying: !prev[index]?.isPlaying
+        }
+      }));
     }
   };
 
@@ -103,13 +117,24 @@ export default function ProfilesTab() {
             volume={1.0}
             isMuted={false}
             resizeMode={ResizeMode.COVER}
-            shouldPlay={index === activeVideoIndex && videoStatus[index] !== false}
+            shouldPlay={index === activeVideoIndex && videoStatus[index]?.isPlaying !== false}
             isLooping={true}
             style={styles.video}
             useNativeControls={false}
             onPlaybackStatusUpdate={(status: AVPlaybackStatus) => {
               if (status.isLoaded) {
-                setVideoStatus(prev => ({ ...prev, [index]: status.isPlaying }));
+                const progress = status.durationMillis 
+                  ? status.positionMillis / status.durationMillis 
+                  : 0;
+                setVideoStatus(prev => ({ 
+                  ...prev, 
+                  [index]: {
+                    isPlaying: status.isPlaying,
+                    positionMillis: status.positionMillis,
+                    durationMillis: status.durationMillis || 0,
+                    progress: progress
+                  } 
+                }));
               }
             }}
           />
@@ -132,11 +157,23 @@ export default function ProfilesTab() {
           )}
         </View>
       </TouchableWithoutFeedback>
-      {/* <View style={styles.iconContainer}>
-        <View style={styles.iconBox} />
-        <View style={styles.iconBox} />
-        <View style={styles.iconBox} />
-      </View> */}
+      <View style={styles.overlay}>
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.7)']}
+          style={styles.gradient}
+        >
+          <View style={styles.progressBarContainer}>
+            <View 
+              style={[
+                styles.progressBar, 
+                { 
+                  width: `${(videoStatus[index]?.progress || 0) * 100}%` 
+                }
+              ]} 
+            />
+          </View>
+        </LinearGradient>
+      </View>
     </View>
   );
 
@@ -158,7 +195,13 @@ export default function ProfilesTab() {
   }) => {
     if (viewableItems.length > 0 && viewableItems[0].index !== null) {
       setActiveVideoIndex(viewableItems[0].index);
-      setVideoStatus(prev => ({ ...prev, [viewableItems[0].index!]: true }));
+      setVideoStatus(prev => ({
+        ...prev,
+        [viewableItems[0].index!]: {
+          ...prev[viewableItems[0].index!],
+          isPlaying: true
+        }
+      }));
     }
   }).current;
 
@@ -215,5 +258,27 @@ const styles = StyleSheet.create({
     height: 80,
     backgroundColor: 'red', // You can change this color
     borderRadius: 40, // This makes it circular
+  },
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100, // Adjust as needed
+  },
+  gradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 10, // Add some padding at the bottom
+  },
+  progressBarContainer: {
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    width: '100%',
+    marginBottom: 16, // Space between progress bar and bottom of the screen
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: 'white',
   },
 });
