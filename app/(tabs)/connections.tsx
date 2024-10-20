@@ -6,6 +6,7 @@ import { ThemedText } from '../../components/ThemedText';
 // Import DateTimePicker
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { videos } from './profiles'; // Import the videos array
+import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 // Add this type definition at the top of your file, after the imports
 type Connection = { id: number; name: string; source: any };
@@ -21,7 +22,7 @@ export default function ConnectionsTab() {
     setShowDatePicker(true);
   };
 
-  const handleDateChange = (event: Event, selectedDate?: Date) => {
+  const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate && selectedConnection) {
       console.log(`Scheduled for ${selectedConnection.name}: ${selectedDate}`);
