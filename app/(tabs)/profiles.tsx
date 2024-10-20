@@ -30,7 +30,7 @@ export const videos: Video[] = [
   { 
     id: 2, 
     name: 'Anya B.', 
-    age: 30, // Add age
+    age: 29, // Add age
     source: require('../../assets/video_profiles/anya_profile.mp4'),
     preferredTime: '2:00 PM'
   },

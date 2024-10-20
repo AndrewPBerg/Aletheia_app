@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 interface VideoCallProps {
   userVideo: any;
@@ -38,7 +40,6 @@ const VideoCall: React.FC<VideoCallProps> = ({ userVideo, connectionVideo, onClo
 
   return (
     <View style={styles.container}>
-      <Text style={styles.timer}>{formatTime(timer)}</Text>
       <View style={styles.videoContainer}>
         <Video
           source={connectionVideo}
@@ -55,14 +56,22 @@ const VideoCall: React.FC<VideoCallProps> = ({ userVideo, connectionVideo, onClo
           isLooping
         />
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.addTimeButton} onPress={addTime}>
-          <Text style={styles.buttonText}>Add 5 Minutes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.endCallButton} onPress={onClose}>
-          <Text style={styles.buttonText}>End Call</Text>
-        </TouchableOpacity>
-      </View>
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.7)']}
+        style={styles.overlay}
+      >
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>{formatTime(timer)}</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.iconButton} onPress={addTime}>
+            <Ionicons name="add-circle" size={50} color="#4169E1" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={onClose}>
+            <Ionicons name="call" size={50} color="#FF0000" />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
     </View>
   );
 };
@@ -73,14 +82,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-  },
-  timer: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    color: 'white',
-    fontSize: 18,
-    zIndex: 1,
   },
   videoContainer: {
     flex: 1,
@@ -97,30 +98,34 @@ const styles = StyleSheet.create({
     height: height * 0.2,
     borderRadius: 10,
   },
-  buttonContainer: {
+  overlay: {
     position: 'absolute',
-    bottom: 40,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  addTimeButton: {
-    backgroundColor: 'green',
-    paddingVertical: 10,
+    bottom: 0,
+    paddingVertical: 20,
     paddingHorizontal: 20,
-    borderRadius: 25,
   },
-  endCallButton: {
-    backgroundColor: 'red',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
+  timerContainer: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginBottom: 20,
   },
-  buttonText: {
+  timerText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  iconButton: {
+    padding: 10,
   },
 });
 
