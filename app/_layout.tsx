@@ -1,3 +1,4 @@
+import { LogBox } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, Tabs } from 'expo-router';
@@ -9,6 +10,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import {Colors} from '../constants/Colors';
 import { GlobalStateProvider } from '@/context/GlobalStateContext';
+
+// Add this line at the top of the file, after the imports
+LogBox.ignoreLogs(['[Reanimated] Reduced motion setting is enabled on this device.']);
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -55,7 +59,7 @@ function RootLayoutNav() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          {/* <Stack.Screen name="modal" options={{ presentation: 'modal' }} /> */}
         </Stack>
       </ThemeProvider>
     </GlobalStateProvider>

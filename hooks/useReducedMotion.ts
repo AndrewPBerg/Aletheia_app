@@ -11,4 +11,6 @@ export function useReducedMotion() {
   }, []);
 
   return isReducedMotion;
+
+  
 }
