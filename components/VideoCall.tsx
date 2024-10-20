@@ -32,6 +32,10 @@ const VideoCall: React.FC<VideoCallProps> = ({ userVideo, connectionVideo, onClo
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
+  const addTime = () => {
+    setTimer((prevTimer) => prevTimer + 5 * 60); // Add 5 minutes
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.timer}>{formatTime(timer)}</Text>
@@ -51,9 +55,14 @@ const VideoCall: React.FC<VideoCallProps> = ({ userVideo, connectionVideo, onClo
           isLooping
         />
       </View>
-      <TouchableOpacity style={styles.endCallButton} onPress={onClose}>
-        <Text style={styles.endCallText}>End Call</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.addTimeButton} onPress={addTime}>
+          <Text style={styles.buttonText}>Add 5 Minutes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.endCallButton} onPress={onClose}>
+          <Text style={styles.buttonText}>End Call</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -88,16 +97,27 @@ const styles = StyleSheet.create({
     height: height * 0.2,
     borderRadius: 10,
   },
-  endCallButton: {
+  buttonContainer: {
     position: 'absolute',
     bottom: 40,
-    alignSelf: 'center',
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  addTimeButton: {
+    backgroundColor: 'green',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+  },
+  endCallButton: {
     backgroundColor: 'red',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
   },
-  endCallText: {
+  buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
