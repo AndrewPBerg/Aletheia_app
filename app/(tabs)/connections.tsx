@@ -1,38 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, Button } from 'react-native';
 import { useGlobalState } from '@/context/GlobalStateContext';
 import { Link } from 'expo-router';
 import { ThemedText } from '../../components/ThemedText';
 // Import DateTimePicker
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { videos } from './profiles'; // Import the videos array
 
 // Add this type definition at the top of your file, after the imports
-type Connection = { id: number; name: string };
+type Connection = { id: number; name: string; source: any };
 
 export default function ConnectionsTab() {
-  const { likedVideos } = useGlobalState();
+  const { connections } = useGlobalState();
 
-  const renderVideoItem = ({ item }: { item: string }) => (
-    <View style={styles.videoContainer}>
-      <Text style={styles.videoName}>{item}</Text>
-    </View>
-  );
-
-  const [connections, setConnections] = React.useState([
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Smith' },
-    // ... other connections
-  ]);
-
-  const [showDatePicker, setShowDatePicker] = React.useState(false);
-  const [selectedConnection, setSelectedConnection] = React.useState<Connection | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
 
   const handleSchedule = (connection: Connection) => {
     setSelectedConnection(connection);
     setShowDatePicker(true);
   };
 
-  const handleDateChange = (event: Event, selectedDate: Date | undefined) => {
+  const handleDateChange = (event: Event, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate && selectedConnection) {
       console.log(`Scheduled for ${selectedConnection.name}: ${selectedDate}`);
@@ -40,47 +29,42 @@ export default function ConnectionsTab() {
     }
   };
 
+  const renderConnectionItem = ({ item }: { item: Connection }) => (
+    <View style={styles.connectionRow}>
+      <ThemedText>{item.name}</ThemedText>
+      <View style={styles.buttonContainer}>
+        <Link href={{ pathname: "/profiles", params: { id: item.id } }} asChild>
+          <Button title="View Profile" />
+        </Link>
+        <Button 
+          title="Schedule" 
+          onPress={() => handleSchedule(item)}
+        />
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Your Connections</Text>
       </View>
       <View style={styles.container}>
-        {likedVideos.length > 0 ? (
+        {connections.length > 0 ? (
           <FlatList
-            data={likedVideos}
-            renderItem={renderVideoItem}
-            keyExtractor={(item, index) => index.toString()}
+            data={connections}
+            renderItem={renderConnectionItem}
+            keyExtractor={(item) => item.id.toString()}
           />
         ) : (
           <Text style={styles.emptyText}>No connections yet. Double tap videos to add them here!</Text>
         )}
-        {connections.map((connection) => (
-          <View key={connection.id} style={styles.connectionRow}>
-            <ThemedText>{connection.name}</ThemedText>
-            <View style={styles.buttonContainer}>
-              <Link href="/profiles" asChild>
-                <Button title="View Profile" />
-              </Link>
-              <Button 
-                title="Schedule" 
-                onPress={() => handleSchedule(connection)}
-              />
-            </View>
-          </View>
-        ))}
         {showDatePicker && (
           <DateTimePicker
             value={new Date()}
             mode="date"
             display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate && selectedConnection) {
-                console.log(`Scheduled for ${selectedConnection.name}: ${selectedDate}`);
-                // Here you can implement the logic to save the scheduled date
-              }
-            }}
+            onChange={handleDateChange}
           />
         )}
       </View>

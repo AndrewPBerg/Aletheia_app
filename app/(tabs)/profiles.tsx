@@ -7,10 +7,10 @@ const { width, height } = Dimensions.get('window');
 const iconSize = 50; // Size of each icon box
 const iconMargin = 10; // Margin between icon boxes
 
-const videos = [
-  { name: 'Demo Video 1', source: require('../../assets/video_profiles/demoVideo1.mp4') },
-  { name: 'Demo Video 2', source: require('../../assets/video_profiles/demoVideo2.mp4') },
-  { name: 'Demo Video 3', source: require('../../assets/video_profiles/demoVideo3.mp4') },
+export const videos = [
+  { id: 1, name: 'Demo Video 1', source: require('../../assets/video_profiles/demoVideo1.mp4') },
+  { id: 2, name: 'Demo Video 2', source: require('../../assets/video_profiles/demoVideo2.mp4') },
+  { id: 3, name: 'Demo Video 3', source: require('../../assets/video_profiles/demoVideo3.mp4') },
 ];
 
 export default function ProfilesTab() {
@@ -22,7 +22,7 @@ export default function ProfilesTab() {
   const doubleTapRef = useRef<{ [key: number]: NodeJS.Timeout | null }>({});
   const likeAnimationRef = useRef<{ [key: number]: Animated.Value }>({});
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const { addLikedVideo } = useGlobalState();
+  const { addLikedVideo, addConnection } = useGlobalState();
 
   useEffect(() => {
     Object.keys(likedVideos).forEach((index) => {
@@ -87,8 +87,9 @@ export default function ProfilesTab() {
       useNativeDriver: true,
     }).start();
 
-    // Add the liked video name to the global state
+    // Add the liked video to connections
     addLikedVideo(videos[index].name);
+    addConnection(videos[index]);
   };
 
   const renderVideoItem = ({ item, index }: { item: { name: string; source: any }; index: number }) => (
